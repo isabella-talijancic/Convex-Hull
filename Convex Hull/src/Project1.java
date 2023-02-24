@@ -9,8 +9,6 @@
  * - Amalia Taliancic (fwn783)
  */
 
-
-
 import java.util.*;
 import java.io.*;
 
@@ -31,29 +29,24 @@ public class Project1 {
 
         List<Integer> hull = convexHull(xCoords, yCoords);
         System.out.println(hull);
-        
-        //writeConvexHullToFile("data/output.txt", hull);
+        writeConvexHullToFile("data/output.txt", hull);
     }
 
-//    private static void writeConvexHullToFile(String filename, List<Integer> hull) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//    private static void writeConvexHullToFile(String filename, List<Point> convexHull) throws IOException {
-//        BufferedWriter writer = null;
-//        try {
-//            writer = new BufferedWriter(new FileWriter(filename));
-//            for (Point p : convexHull) {
-//                writer.write(p.x + "," + p.y + "\n");
-//            }
-//        } catch (IOException e) {
-//            throw e;
-//        } finally {
-//            if (writer != null) {
-//                writer.close();
-//            }
-//        }
-//    }
+    private static void writeConvexHullToFile(String filename, List<Integer> hull) throws IOException {
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(filename));
+            for (int index : hull) {
+                writer.write(index + "\n");
+            }
+        } catch (IOException e) {
+            throw e;
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
+        }
+    }
 
 	public static List<Integer> convexHull(List<Double> xCoords, List<Double> yCoords) {
         int n = xCoords.size();
