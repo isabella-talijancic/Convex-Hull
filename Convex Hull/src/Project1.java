@@ -1,131 +1,235 @@
 /**
- * Project1 is a Java class containing a main method to run the program when completed.
+ * 
+ * In this project, we will compute the convex hull of a given set of n points in two dimensions 
+ * (i.e., each point has an x-coordinate and a y-coordinate) using a Divide and Conquer algorithm.
+ * 
+ * Output has been redirected to output.txt and designated input will be input.csv
  * 
  * UTSA CS 3343 - Project 1
- * Fall 2023
+ * Spring 2023
  * 
  * Authors:
- * - Isabella Taliancic (juu530)
- * - Amalia Taliancic (fwn783)
+ * @author Isabella Taliancic (juu530)
+ * @author Amalia Taliancic (fwn783)
+ * 
  */
 
+//imports
 import java.util.*;
 import java.io.*;
 
-public class Project1 {
-    public static void main(String[] args) throws Exception {
-        BufferedReader br = new BufferedReader(new FileReader("data/input.csv"));
-        List<Double> xCoords = new ArrayList<>();
-        List<Double> yCoords = new ArrayList<>();
+/**
+ * Project1 is a Java class containing a main method to run the program when completed.
+ */
+public class Project1 
+{
+    public static void main( String[] args ) throws Exception 
+    {
+    	/**
+    	 * Start by reading in input from "data/input.csv" and using line.split to parse
+    	 * through x and y coordinates as values within Array List
+    	 */
+        BufferedReader buffRead = new BufferedReader( new FileReader( "input.csv" ) );
+        
+        List<Double> xCoordinates = new ArrayList<>();
+        List<Double> yCoordinates = new ArrayList<>();
+        
         String line;
-        while ((line = br.readLine()) != null) {
-            String[] coords = line.split(",");
-            double x = Double.parseDouble(coords[0]);
-            double y = Double.parseDouble(coords[1]);
-            xCoords.add(x);
-            yCoords.add(y);
+        
+        while ( ( line = buffRead.readLine() ) != null ) 
+        {
+            String[] readCoordinates = line.split( "," );
+            
+            double x = Double.parseDouble( readCoordinates[0] );
+            double y = Double.parseDouble( readCoordinates[1] );
+            
+            xCoordinates.add(x);
+            yCoordinates.add(y);
         }
-        br.close();
+        
+       //closing file
+        buffRead.close();
 
-        List<Integer> hull = convexHull(xCoords, yCoords);
-        System.out.println(hull);
-        writeConvexHullToFile("data/output.txt", hull);
+        /**
+         * With hull integer list, will return list of points forming the convex hull
+         */
+        List<Integer> hull = convexHull( xCoordinates, yCoordinates );
+        //System.out.println(hull); Testing
+        writeFile( "output.txt", hull );
+    }
+    
+    /**
+     * Coordinates class and constructor for setting x1 and y1 variables
+     */
+    static class coordinates 
+    { 
+    	public int x1;
+    	public int y1;
+
+    	public coordinates( int x2, int y2 ) 
+    	{
+    	    this.x1 = x2;
+    	    this.y1 = y2;
+    	}
     }
 
-    private static void writeConvexHullToFile(String filename, List<Integer> hull) throws IOException {
-        BufferedWriter writer = null;
-        try {
-            writer = new BufferedWriter(new FileWriter(filename));
-            for (int index : hull) {
-                writer.write(index + "\n");
+    /*
+     * writeFile() takes in filename as a String and a List of integers called hull 
+     * in order to write output to file (output.txt) while throwing IOException
+     */
+    private static void writeFile( String filename, List<Integer> hull ) throws IOException 
+    {
+        BufferedWriter writing = null;
+        try 
+        {
+            writing = new BufferedWriter( new FileWriter( filename ) );
+            
+            for ( int indexPoint : hull ) 
+            {
+                writing.write( indexPoint + "\n" );
             }
-        } catch (IOException e) {
+        } 
+        catch (IOException e) 
+        {
             throw e;
-        } finally {
-            if (writer != null) {
-                writer.close();
+        } 
+        finally 
+        {
+            if ( writing != null ) 
+            {
+                writing.close();
             }
         }
     }
 
-	public static List<Integer> convexHull(List<Double> xCoords, List<Double> yCoords) {
-        int n = xCoords.size();
+    /**
+     * convexHull() takes in doubles xCoordinates and yCoordinates. First, method finds size of 
+     * inputs -- if less than three, indices are returned and if otherwise, convex hull is 
+     * therefore possible and computed
+     */
+	public static List<Integer> convexHull( List<Double> xCoordinates, List<Double> yCoordinates ) 
+	{
+        int size = xCoordinates.size();
+        
         List<Integer> hull = new ArrayList<>();
 
-        if (n < 3) {
-            for (int i = 0; i < n; i++) {
+        if ( size < 3 ) 
+        {
+            for ( int i = 0; i < size; i++ ) 
+            {
                 hull.add(i);
             }
             return hull;
         }
 
-        int min = 0, max = n - 1;
-        double minY = yCoords.get(min), maxY = yCoords.get(max);
+        int minimum = 0;
+        int maximum = size - 1;
+        
+        double minimumYCoord = yCoordinates.get( minimum ), maximumYCoord = yCoordinates.get( maximum );
 
-        while (min < max) {
-            int mid = min + (max - min) / 2;
-            if (yCoords.get(mid) < minY) {
-                minY = yCoords.get(mid);
-                min = mid;
-            } else if (yCoords.get(mid) > maxY) {
-                maxY = yCoords.get(mid);
-                max = mid;
-            } else {
+        while ( minimum < maximum ) 
+        {
+            int middle;
+            middle = minimum + (maximum - minimum) / 2;
+            
+            if ( yCoordinates.get( middle ) < minimumYCoord ) 
+            {
+                minimumYCoord = yCoordinates.get( middle );
+                minimum = middle;
+            } 
+            else if ( yCoordinates.get( middle ) > maximumYCoord ) 
+            {
+                maximumYCoord = yCoordinates.get( middle );
+                maximum = middle;
+            } 
+            else 
+            {
                 break;
             }
         }
 
-        divideAndConquer(xCoords, yCoords, min, max, -1, hull);
-        divideAndConquer(xCoords, yCoords, max, min, 1, hull);
+        divCqr( xCoordinates, yCoordinates, minimum, maximum, -1, hull );
+        divCqr( xCoordinates, yCoordinates, maximum, minimum, 1, hull );
 
         return hull;
     }
 
-    public static void divideAndConquer(List<Double> xCoords, List<Double> yCoords, int min, int max, int sign, List<Integer> hull) {
-        boolean allCollinear = true;
+	/**
+     * distance() takes in doubles representing both x and y coordinates of 3 points while finding area 
+     * of the triangle they form together; by using integer clockSign, we can determine direction  
+     * ( i.e. + suggests clockwise vs. - suggests counter-clockwise )
+     * 
+     * Depending on whether or not the distance is positive, that if
+     * the points are arranged in counter-clockwise / clockwise order
+     */
+    public static double distance( double ax, double ay, double bx, double by, double cx, double cy, int clockSign ) 
+    {
+    	/**
+    	 * Use of Shoelace formula to calculate area of triangle
+    	 */
+        double distance = ( bx - ax ) * ( cy - ay ) - ( cx - ax ) * ( by - ay );
+        
+        if ( clockSign * distance < 0 ) 
+        {
+            return -distance;
+        } 
+        else 
+        {
+            return distance;
+        }
+    }
+	
+	/**
+	 * divCqr finds whether or not said coordinates are collinear and if not, makes recursive calls 
+	 * to split themselves; if so, they are added to the hull
+	 * 
+	 * Parameters include the x and y coordinates, minimum and maximum x-coordinates, and clockSign to identify  
+	 * which direction points are given via clock/counter-clockwise order
+	 */
+    public static void divCqr( List<Double> xCoordinates, List<Double> yCoordinates, int minimum, int maximum, int clockSign, List<Integer> hull ) 
+    {
+        boolean isItCollinear = true;
 
-        int index = -1;
-        double maxDist = 0;
-        for (int i = min + 1; i < max; i++) {
-            double dist = distance(xCoords.get(min), yCoords.get(min), xCoords.get(max), yCoords.get(max), xCoords.get(i), yCoords.get(i), sign);
-            if (dist > 0) {
-                allCollinear = false;
-                if (dist > maxDist) {
-                    index = i;
-                    maxDist = dist;
+        int indexPoint = -1;
+        
+        double maximumDistance = 0;
+       
+        int i; 
+        for ( i = minimum + 1; i < maximum; i++ ) 
+        {
+        	/**
+        	 * getting parameters
+        	 */
+            double distance = distance( xCoordinates.get(minimum), yCoordinates.get(minimum), xCoordinates.get(maximum), yCoordinates.get(maximum), xCoordinates.get(i), yCoordinates.get(i), clockSign );
+
+            if ( distance > 0 ) 
+            {
+                isItCollinear = false;
+                
+                if ( distance > maximumDistance ) 
+                {
+                    indexPoint = i;
+                    maximumDistance = distance;
                 }
             }
         }
 
-        if (allCollinear) {
-            for (int i = min + 1; i < max; i++) {
-                hull.add(i);
+        if ( isItCollinear ) {
+        	
+        	int j;
+            for ( j = minimum + 1; j < maximum; j++ ) 
+            {
+                hull.add( j );
             }
+            
             return;
         }
 
-        divideAndConquer(xCoords, yCoords, min, index, sign, hull);
-        hull.add(index);
-        divideAndConquer(xCoords, yCoords, index, max, sign, hull);
+        divCqr(xCoordinates, yCoordinates, minimum, indexPoint, clockSign, hull);
+        /**
+         *  indexPoint is added to hull list
+         */
+        hull.add(indexPoint);
+        divCqr(xCoordinates, yCoordinates, indexPoint, maximum, clockSign, hull);
     }
-
-    public static double distance(double ax, double ay, double bx, double by, double cx, double cy, int sign) {
-        double dist = (bx - ax) * (cy - ay) - (cx - ax) * (by - ay);
-        if (sign * dist < 0) {
-            return -dist;
-        } else {
-            return dist;
-        }
-    }
-
-    static class Point { 
-    	public int x;
-    	public int y;
-
-    	public Point(int x2, int y2) {
-    	    this.x = x2;
-    	    this.y = y2;
-    	}
- }
-    
 }
